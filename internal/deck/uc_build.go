@@ -3,7 +3,9 @@ package deck
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"os"
 	"slices"
 	"strings"
 
@@ -29,12 +31,25 @@ type BuildDeckParams struct {
 	Level          string
 }
 
-type Deck struct {
-	Size     int               `json:"size"`
-	Strategy string            `json:"strategy"`
-	Name     string            `json:"name"`
-	Deck     []domain.DeckCard `json:"deck"`
-}
+type (
+	DeckCard struct {
+		ID       string
+		Name     string
+		Title    string
+		Number   string
+		Set      string
+		Type     string
+		Rarity   string
+		Quantity int
+		Filepath string
+	}
+	Deck struct {
+		Size     int
+		Strategy string
+		Name     string
+		Deck     []DeckCard
+	}
+)
 
 func (uc *BuildDeckUseCase) Build(ctx context.Context, params BuildDeckParams) (Deck, error) {
 	if strings.TrimSpace(params.CollectionName) == "" {
@@ -62,16 +77,22 @@ func (uc *BuildDeckUseCase) Build(ctx context.Context, params BuildDeckParams) (
 		return Deck{}, err
 	}
 
-	deck := make([]domain.DeckCard, 0)
+	deck := make([]DeckCard, 0)
 
-	// for _, c := range response.Deck {
-	// 	deck = append(deck, domain.DeckCard{
-	// 		//			collection.Cards[c.ID],
-	// 		//			FilePath: fmt.Sprintf("https://cdn.dreamborn.ink/images/fr/cards/%s", c.ID),
-	// 		//			Quantity: c.Quantity,
-	// 	})
-	// }
-	//
+	for _, c := range response.Deck {
+		originalCard := collection.Cards[c.ID]
+		deck = append(deck, DeckCard{
+			ID:       originalCard.ID,
+			Name:     originalCard.Name,
+			Title:    originalCard.Title,
+			Type:     originalCard.Type,
+			Number:   originalCard.Number,
+			Rarity:   originalCard.Rarity,
+			Quantity: c.Quantity,
+			Filepath: fmt.Sprintf("%s/%s", os.Getenv("CDN_URL"), originalCard.ID),
+		})
+	}
+
 	return Deck{
 		Size:     response.Size,
 		Strategy: response.Strategy,

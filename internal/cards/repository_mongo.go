@@ -64,6 +64,9 @@ func buildMongoFilter(f ListFilter) bson.D {
 	return filter
 }
 
-func (r MongoCardRepository) FindByID(ctx context.Context, ID string) (domain.Card, error) {
-	return domain.Card{}, nil
+func (r *MongoCardRepository) FindByID(ctx context.Context, ID string) (domain.Card, error) {
+	card := new(domain.Card)
+	err := r.col.FindOne(ctx, bson.D{{Key: "_id", Value: ID}}).Decode(card)
+
+	return *card, err
 }

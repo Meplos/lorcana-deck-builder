@@ -14,7 +14,7 @@ import (
 	"github.com/meplos/locana-deck-builder/internal/domain"
 )
 
-func main() {
+func _main() {
 	ctx := context.Background()
 
 	home, _ := os.UserHomeDir()

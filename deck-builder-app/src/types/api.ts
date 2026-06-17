@@ -94,14 +94,14 @@ export const DECK_LEVELS: { value: DeckLevel; label: string }[] = [
   { value: 'advanced', label: 'Avancé' },
 ]
 
-/** Body de POST /deck */
+/** Body de POST /deck/build */
 export interface BuildDeckBody {
   collection: string
   colors: InkColor[]
   level: string
 }
 
-/** Carte dans la réponse POST /deck */
+/** Carte dans la réponse POST /deck/build */
 export interface DeckCard {
   id: string
   name: string
@@ -114,7 +114,7 @@ export interface DeckCard {
   quantity: number
 }
 
-/** Réponse POST /deck */
+/** Réponse POST /deck/build */
 export interface GeneratedDeck {
   name: string
   size: number

@@ -69,9 +69,9 @@ export function addCard(body: AddCardBody): Promise<void> {
   })
 }
 
-/** POST /deck */
+/** POST /deck/build */
 export async function buildDeck(body: BuildDeckBody): Promise<GeneratedDeck> {
-  const raw = await request<RawGeneratedDeck>('/deck', {
+  const raw = await request<RawGeneratedDeck>('/deck/build', {
     method: 'POST',
     body: JSON.stringify(body),
   })

@@ -1,4 +1,4 @@
-package deck
+package http
 
 import (
 	"net/http"
@@ -40,5 +40,10 @@ func (h *Handler) BuildDeck(ctx *echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, err)
 	}
 
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, DeckBuildResponse{
+		Size:     res.Size,
+		Strategy: res.Strategy,
+		Deck:     MapDeckCards(res.Deck),
+		Name:     res.Name,
+	})
 }

@@ -33,9 +33,9 @@ type (
 		Quantity        int           `bson:"quantity"`
 	}
 	Deck struct {
-		Size     int        `json:"size"`
-		Strategy string     `json:"strategy"`
-		Name     string     `json:"name"`
-		Deck     []DeckCard `json:"deck"`
+		Size     int        `bson:"size"`
+		Strategy string     `bson:"strategy"`
+		Name     string     `bson:"name"`
+		Deck     []DeckCard `bson:"deck"`
 	}
 )
