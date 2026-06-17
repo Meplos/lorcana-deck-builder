@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - schema: "./sqlc/schema.sql"       # Où se trouve la structure de ta DB
+    queries: "./sqlc/query.sql"       # Où tu vas écrire tes requêtes SQL
+    engine: "sqlite"           # Moteur SQLite
+    gen:
+      go:
+        package: "db"          # Nom du package Go généré
+        out: "internal/db/sql"              # Dossier où le code sera généré
