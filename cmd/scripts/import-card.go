@@ -9,11 +9,9 @@ import (
 	"path/filepath"
 
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/meplos/locana-deck-builder/internal/db/mongo/schema"
-	db "github.com/meplos/locana-deck-builder/internal/db/sql"
-	"github.com/meplos/locana-deck-builder/internal/ink"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	localMongo "github.com/meplos/locana-deck-builder/internal/database/mongo"
+	database "github.com/meplos/locana-deck-builder/internal/database/sql"
+	"github.com/meplos/locana-deck-builder/internal/domain"
 )
 
 func main() {
@@ -28,7 +26,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	queries := db.New(conn)
+	queries := database.New(conn)
 
 	sqlCards, err := queries.ListCards(ctx)
 	if err != nil {
@@ -37,7 +35,7 @@ func main() {
 
 	collections := make([]any, 0)
 	for _, c := range sqlCards {
-		ab := []schema.Ability{}
+		ab := []domain.Ability{}
 
 		if c.Abilities.Valid {
 			if err := json.Unmarshal([]byte(c.Abilities.String), &ab); err != nil {
@@ -46,7 +44,7 @@ func main() {
 		}
 		log.Printf("%v", ab)
 
-		nC := schema.Card{
+		nC := domain.Card{
 			ID:              c.ID,
 			Name:            c.Name,
 			Set:             c.SetId,
@@ -55,7 +53,7 @@ func main() {
 			Cost:            int(c.Cost),
 			Type:            c.Type,
 			Number:          c.Number,
-			Color:           ink.GetInkStrings(ink.InkMask(c.ColorMask)),
+			Color:           domain.GetInkStrings(domain.InkMask(c.ColorMask)),
 			Illustrator:     c.Illustrator.String,
 			Lore:            int(c.Lore.Int64),
 			Strength:        int(c.Strength.Int64),
@@ -78,15 +76,12 @@ func main() {
 
 	log.Printf("Size: %d\n", len(collections))
 
-	mongoURI := "mongodb://root:example@localhost:9999"
-	log.Printf("[IMPORT_CARD] MONGO URI: %v", mongoURI)
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+	db, err := localMongo.Connect(ctx, "lorcana")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
-	coll := client.Database("lorcana").Collection("cards")
+	coll := db.Collection("cards")
 	log.Println(coll.Name())
 
 	res, err := coll.InsertMany(ctx, collections, nil)
@@ -94,9 +89,4 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Print(res)
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
 }

@@ -12,6 +12,7 @@ import {
   type GeneratedDeck,
   type InkColor,
 } from '@/types/api'
+import { INK_COLOR_ACCENT, INK_COLOR_INFO } from '@/data/inkColors'
 import { normalizeRarity } from '@/utils/rarity'
 
 const { data: collectionsData } = useQuery({
@@ -113,6 +114,64 @@ function closePreview() {
 
 <template>
   <div class="flex min-h-screen w-full flex-col gap-6 px-3 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:px-8">
+    <section
+      v-if="!deck && !isBuilding"
+      class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800"
+    >
+      <h2 class="text-sm font-semibold text-slate-900 dark:text-white">
+        Identités des encres
+      </h2>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Rappel des caractéristiques principales de chaque couleur pour t'aider à choisir ton duo.
+      </p>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <article
+          v-for="c in INK_COLORS"
+          :key="`info-${c}`"
+          class="rounded-xl border p-3 transition"
+          :class="[
+            INK_COLOR_ACCENT[c].border,
+            isColorSelected(c)
+              ? `${INK_COLOR_ACCENT[c].bg} shadow-sm`
+              : 'border-slate-200 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-900/40',
+          ]"
+        >
+          <div class="flex items-center gap-2">
+            <span
+              class="size-2.5 shrink-0 rounded-full"
+              :class="INK_COLOR_ACCENT[c].dot"
+              aria-hidden="true"
+            />
+            <h3
+              class="text-sm font-semibold"
+              :class="isColorSelected(c) ? INK_COLOR_ACCENT[c].text : 'text-slate-900 dark:text-white'"
+            >
+              {{ INK_COLOR_INFO[c].label }}
+            </h3>
+            <span
+              class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+              :class="
+                isColorSelected(c)
+                  ? `${INK_COLOR_ACCENT[c].bg} ${INK_COLOR_ACCENT[c].text}`
+                  : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+              "
+            >
+              {{ INK_COLOR_INFO[c].archetype }}
+            </span>
+          </div>
+          <ul class="mt-2 space-y-1 pl-4">
+            <li
+              v-for="trait in INK_COLOR_INFO[c].traits"
+              :key="trait"
+              class="list-disc text-xs leading-relaxed text-slate-600 dark:text-slate-400"
+            >
+              {{ trait }}
+            </li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
     <header>
       <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
         Créer un <span class="text-emerald-500">deck</span>
@@ -164,15 +223,15 @@ function closePreview() {
             :key="c"
             type="button"
             :disabled="isColorDisabled(c)"
-            class="rounded-full border px-4 py-1.5 text-sm font-medium capitalize transition disabled:cursor-not-allowed disabled:opacity-40"
+            class="rounded-full border px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
             :class="
               isColorSelected(c)
-                ? 'border-emerald-500 bg-emerald-500 text-white'
+                ? `${INK_COLOR_ACCENT[c].border} ${INK_COLOR_ACCENT[c].bg} ${INK_COLOR_ACCENT[c].text} ring-2 ring-offset-1 ring-current dark:ring-offset-slate-800`
                 : 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700'
             "
             @click="toggleColor(c)"
           >
-            {{ c }}
+            {{ INK_COLOR_INFO[c].label }}
           </button>
         </div>
       </div>
@@ -260,9 +319,10 @@ function closePreview() {
               <span
                 v-for="c in colors"
                 :key="c"
-                class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+                class="rounded-full px-3 py-1 text-xs font-semibold"
+                :class="`${INK_COLOR_ACCENT[c].bg} ${INK_COLOR_ACCENT[c].text}`"
               >
-                {{ c }}
+                {{ INK_COLOR_INFO[c].label }}
               </span>
             </div>
             <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">

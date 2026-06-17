@@ -2,40 +2,40 @@ package main
 
 import (
 	"context"
-	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	"github.com/joho/godotenv"
-	"github.com/meplos/locana-deck-builder/internal/cards"
-	"github.com/meplos/locana-deck-builder/internal/collection"
-	"github.com/meplos/locana-deck-builder/internal/deck"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/meplos/locana-deck-builder/internal/app"
+	"github.com/meplos/locana-deck-builder/internal/database/mongo"
 )
 
 func main() {
 	_ = godotenv.Load()
 	e := echo.New()
+
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS("*"))
+
 	ctx := context.Background()
-	mongoURI := "mongodb://root:example@localhost:9999"
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
+
+	DB, err := mongo.Connect(ctx, os.Getenv("DB_NAME"))
 	if err != nil {
-		log.Fatal(err)
+		e.Logger.Error("error while connecting DB", err)
+		panic(err)
 	}
-	defer client.Disconnect(ctx)
-	db := client.Database("lorcana")
 
-	api := e.Group("/api/v1")
+	container, _ := app.NewContainer(DB)
+	if err := app.RegisterRoute(e, container); err != nil {
+		e.Logger.Error("error while registering routes", err)
+		panic(err)
+	}
 
-	cards.SetUp(ctx, api, db)
-	collection.SetUp(ctx, api, db)
-	deck.SetUp(ctx, api, db)
-
+	defer mongo.Disconnect(ctx)
 	if err := e.Start(":9090"); err != nil {
-		log.Fatal(err)
+		e.Logger.Error("error while serving", err)
+		panic(err)
 	}
 }
