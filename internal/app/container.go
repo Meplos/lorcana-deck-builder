@@ -36,8 +36,10 @@ func NewContainer(DB *mongo.Database) (*Container, error) {
 	)
 
 	aiAgent := deck.NewAIAgent()
+	deckRepo := deck.NewRepository(DB)
 	deckBuildUC := deck.CreateBuildDeckUC(collectionRepo, aiAgent)
-	deckHandler := deckHttp.NewHandler(deckBuildUC)
+	deckSaveUC := deck.NewSaveUC(deckRepo, cardsRepository)
+	deckHandler := deckHttp.NewHandler(deckBuildUC, deckSaveUC)
 
 	return &Container{
 		CardHandler:       cardHandler,

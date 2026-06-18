@@ -70,3 +70,30 @@ func (r *MongoCardRepository) FindByID(ctx context.Context, ID string) (domain.C
 
 	return *card, err
 }
+
+func (r *MongoCardRepository) FindByIDs(ctx context.Context, IDs []string) (map[string]domain.Card, error) {
+	cursor, err := r.col.Find(ctx, bson.D{{
+		Key: "_id",
+		Value: bson.D{
+			{
+				Key:   "$in",
+				Value: IDs,
+			},
+		},
+	}})
+	if err != nil {
+		return nil, err
+	}
+
+	tmpArr := make([]domain.Card, 0)
+	if err := cursor.All(ctx, &tmpArr); err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]domain.Card)
+	for _, c := range tmpArr {
+		result[c.ID] = c
+	}
+
+	return result, nil
+}

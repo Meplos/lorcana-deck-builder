@@ -1,3 +1,4 @@
+// Package cards : repository.go -> Expose All cards.Repository interface
 package cards
 
 import (
@@ -17,4 +18,5 @@ type Repository interface {
 	ListCards(ctx context.Context, f ListFilter) []domain.Card
 	CountCards(ctx context.Context, f ListFilter) int64
 	FindByID(ctx context.Context, ID string) (domain.Card, error)
+	FindByIDs(ctx context.Context, IDs []string) (map[string]domain.Card, error)
 }

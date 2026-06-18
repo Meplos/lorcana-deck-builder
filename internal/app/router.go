@@ -20,6 +20,7 @@ func RegisterRoute(e *echo.Echo, container *Container) error {
 
 	// deck
 	group.POST("/deck/build", container.DeckHandler.BuildDeck)
+	group.POST("/deck", container.DeckHandler.Save)
 
 	return nil
 }

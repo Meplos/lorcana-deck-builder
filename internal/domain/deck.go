@@ -33,6 +33,7 @@ type (
 		Quantity        int           `bson:"quantity"`
 	}
 	Deck struct {
+		ID       string     `bson:"_id"`
 		Size     int        `bson:"size"`
 		Strategy string     `bson:"strategy"`
 		Name     string     `bson:"name"`

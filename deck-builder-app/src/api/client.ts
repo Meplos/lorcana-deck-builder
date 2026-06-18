@@ -7,8 +7,8 @@ import type {
   PaginatedCards,
   PaginateParams,
   PaginatedCollections,
+  SaveDeckBody,
 } from '@/types/api'
-import { normalizeGeneratedDeck, type RawGeneratedDeck } from '@/api/deck'
 
 export const API_BASE = 'http://localhost:9090/api/v1'
 
@@ -61,21 +61,30 @@ export function createCollection(body: CreateCollectionBody): Promise<void> {
   })
 }
 
-/** POST /collections/card */
+/** GET /collections/add-card */
 export function addCard(body: AddCardBody): Promise<void> {
-  return request<void>('/collections/card', {
+  const query = new URLSearchParams({
+    collectionId: body.collectionId,
+    cardId: body.cardId,
+    quantity: String(body.quantity),
+  })
+  return request<void>(`/collections/add-card?${query}`)
+}
+
+/** POST /deck/build */
+export function buildDeck(body: BuildDeckBody): Promise<GeneratedDeck> {
+  return request<GeneratedDeck>('/deck/build', {
     method: 'POST',
     body: JSON.stringify(body),
   })
 }
 
-/** POST /deck/build */
-export async function buildDeck(body: BuildDeckBody): Promise<GeneratedDeck> {
-  const raw = await request<RawGeneratedDeck>('/deck/build', {
+/** POST /deck */
+export function saveDeck(body: SaveDeckBody): Promise<void> {
+  return request<void>('/deck', {
     method: 'POST',
     body: JSON.stringify(body),
   })
-  return normalizeGeneratedDeck(raw)
 }
 
 /** GET /collections/export — télécharge un CSV de toutes les collections */

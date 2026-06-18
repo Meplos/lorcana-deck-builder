@@ -41,7 +41,7 @@ export interface PaginateParams {
   color?: InkColor | ''
 }
 
-/** Couleurs d'encre disponibles (cf. internal/ink/color.go) */
+/** Couleurs d'encre disponibles (cf. internal/domain/ink.go) */
 export const INK_COLORS: InkColor[] = [
   'amber',
   'amethyst',
@@ -78,14 +78,14 @@ export interface CreateCollectionBody {
   name: string
 }
 
-/** AddCardBody — body de POST /collections/card */
+/** Query params de GET /collections/add-card */
 export interface AddCardBody {
   collectionId: string
   cardId: string
   quantity: number
 }
 
-/** Niveau de deck souhaité (endpoint non implémenté côté Go) */
+/** Niveau de deck souhaité — body de POST /deck/build */
 export type DeckLevel = 'beginner' | 'intermediate' | 'advanced'
 
 export const DECK_LEVELS: { value: DeckLevel; label: string }[] = [
@@ -120,4 +120,18 @@ export interface GeneratedDeck {
   size: number
   strategy: string
   deck: DeckCard[]
+}
+
+/** Carte dans le body de POST /deck */
+export interface SaveDeckCard {
+  id: string
+  quantity: number
+}
+
+/** Body de POST /deck */
+export interface SaveDeckBody {
+  name: string
+  size: number
+  strategy: string
+  deck: SaveDeckCard[]
 }

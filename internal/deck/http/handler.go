@@ -10,11 +10,13 @@ import (
 
 type Handler struct {
 	buildUC *deck.BuildDeckUseCase
+	saveUC  *deck.SaveUseCase
 }
 
-func NewHandler(buildUC *deck.BuildDeckUseCase) *Handler {
+func NewHandler(buildUC *deck.BuildDeckUseCase, saveUC *deck.SaveUseCase) *Handler {
 	return &Handler{
 		buildUC: buildUC,
+		saveUC:  saveUC,
 	}
 }
 
@@ -46,4 +48,27 @@ func (h *Handler) BuildDeck(ctx *echo.Context) error {
 		Deck:     MapDeckCards(res.Deck),
 		Name:     res.Name,
 	})
+}
+
+func (h *Handler) Save(ctx *echo.Context) error {
+	req := new(SaveDeckRequest)
+	if err := ctx.Bind(req); err != nil {
+		return ctx.NoContent(http.StatusBadRequest)
+	}
+
+	cards := make([]deck.CardInfo, 0)
+	for _, c := range req.Deck {
+		cards = append(cards, deck.CardInfo(c))
+	}
+
+	if err := h.saveUC.Execute(ctx.Request().Context(), &deck.SaveDeckInput{
+		Size:     req.Size,
+		Name:     req.Name,
+		Strategy: req.Strategy,
+		Deck:     cards,
+	}); err != nil {
+		return ctx.NoContent(http.StatusInternalServerError)
+	}
+
+	return ctx.NoContent(http.StatusCreated)
 }

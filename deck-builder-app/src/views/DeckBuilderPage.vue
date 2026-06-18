@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useMutation, useQuery } from '@tanstack/vue-query'
-import { buildDeck, fetchCollections } from '@/api/client'
+import { buildDeck, fetchCollections, saveDeck } from '@/api/client'
 import CardPreviewModal from '@/components/CardPreviewModal.vue'
 import {
   DECK_LEVELS,
@@ -31,6 +31,8 @@ const level = ref<DeckLevel>('beginner')
 const error = ref('')
 const deck = ref<GeneratedDeck | null>(null)
 const previewCard = ref<DeckCard | null>(null)
+const saveFeedback = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+const deckSaved = ref(false)
 
 watch(
   collectionOptions,
@@ -64,9 +66,22 @@ const { mutate: build, isPending: isBuilding } = useMutation({
   onSuccess: (data) => {
     error.value = ''
     deck.value = data
+    saveFeedback.value = null
+    deckSaved.value = false
   },
   onError: () => {
     error.value = 'La génération du deck a échoué.'
+  },
+})
+
+const { mutate: save, isPending: isSaving } = useMutation({
+  mutationFn: saveDeck,
+  onSuccess: () => {
+    deckSaved.value = true
+    saveFeedback.value = { type: 'success', message: 'Deck sauvegardé.' }
+  },
+  onError: () => {
+    saveFeedback.value = { type: 'error', message: 'La sauvegarde a échoué.' }
   },
 })
 
@@ -99,8 +114,24 @@ function restart() {
   deck.value = null
   previewCard.value = null
   error.value = ''
+  saveFeedback.value = null
+  deckSaved.value = false
   colors.value = []
   level.value = 'beginner'
+}
+
+function saveCurrentDeck() {
+  if (!deck.value || deck.value.deck.length === 0) return
+  saveFeedback.value = null
+  save({
+    name: deck.value.name,
+    size: deck.value.size,
+    strategy: deck.value.strategy,
+    deck: deck.value.deck.map((card) => ({
+      id: card.id,
+      quantity: card.quantity,
+    })),
+  })
 }
 
 function openPreview(card: DeckCard) {
@@ -129,12 +160,11 @@ function closePreview() {
           v-for="c in INK_COLORS"
           :key="`info-${c}`"
           class="rounded-xl border p-3 transition"
-          :class="[
-            INK_COLOR_ACCENT[c].border,
+          :class="
             isColorSelected(c)
-              ? `${INK_COLOR_ACCENT[c].bg} shadow-sm`
-              : 'border-slate-200 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-900/40',
-          ]"
+              ? `${INK_COLOR_ACCENT[c].border} ${INK_COLOR_ACCENT[c].bg} shadow-sm`
+              : 'border-slate-200 bg-slate-50/80 dark:border-slate-700 dark:bg-slate-900/40'
+          "
         >
           <div class="flex items-center gap-2">
             <span
@@ -332,13 +362,32 @@ function closePreview() {
               {{ deck.strategy }}
             </p>
           </div>
-          <button
-            type="button"
-            class="self-start rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
-            @click="restart"
-          >
-            Nouveau deck
-          </button>
+          <div class="flex flex-col gap-2 self-start sm:items-end">
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                :disabled="isSaving || deckSaved || deck.deck.length === 0"
+                class="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                @click="saveCurrentDeck"
+              >
+                {{ isSaving ? 'Sauvegarde…' : deckSaved ? 'Deck sauvegardé' : 'Sauvegarder le deck' }}
+              </button>
+              <button
+                type="button"
+                class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+                @click="restart"
+              >
+                Nouveau deck
+              </button>
+            </div>
+            <p
+              v-if="saveFeedback"
+              class="text-xs"
+              :class="saveFeedback.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'"
+            >
+              {{ saveFeedback.message }}
+            </p>
+          </div>
         </div>
       </div>
 
