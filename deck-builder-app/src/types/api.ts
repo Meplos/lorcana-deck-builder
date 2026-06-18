@@ -141,3 +141,11 @@ export interface SavedDecksList {
   total: number
   docs: GeneratedDeck[]
 }
+
+/** Body de POST /auth/register */
+export interface RegisterBody {
+  name: string
+  email: string
+  password: string
+  confirm_password: string
+}

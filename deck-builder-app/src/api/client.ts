@@ -7,28 +7,47 @@ import type {
   PaginatedCards,
   PaginateParams,
   PaginatedCollections,
+  RegisterBody,
   SaveDeckBody,
   SavedDecksList,
 } from '@/types/api'
 
-export const API_BASE = 'http://localhost:9090/api/v1'
+export const API_BASE = import.meta.env.VITE_API_BASE ?? '/api/v1'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
     ...init,
     headers: {
       'Content-Type': 'application/json',
       ...init?.headers,
     },
   })
+  const text = await res.text()
   if (!res.ok) {
-    throw new Error(`Request failed: ${res.status} ${res.statusText}`)
+    let message = `Request failed: ${res.status} ${res.statusText}`
+    if (text) {
+      try {
+        const body = JSON.parse(text) as { error?: string }
+        if (body.error) message = body.error
+      } catch {
+        // ignore malformed error body
+      }
+    }
+    throw new Error(message)
   }
-  if (res.status === 204) {
+  if (res.status === 204 || res.status === 202) {
     return undefined as T
   }
-  const text = await res.text()
   return (text ? JSON.parse(text) : undefined) as T
+}
+
+/** POST /auth/register */
+export function registerUser(body: RegisterBody): Promise<void> {
+  return request<void>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
 }
 
 /** GET /cards */
@@ -95,7 +114,9 @@ export function fetchDecks(): Promise<SavedDecksList> {
 
 /** GET /collections/export — télécharge un CSV de toutes les collections */
 export async function exportCollections(): Promise<void> {
-  const res = await fetch(`${API_BASE}/collections/export`)
+  const res = await fetch(`${API_BASE}/collections/export`, {
+    credentials: 'include',
+  })
   if (!res.ok) {
     throw new Error(`Request failed: ${res.status} ${res.statusText}`)
   }

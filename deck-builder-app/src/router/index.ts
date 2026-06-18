@@ -24,6 +24,11 @@ const router = createRouter({
       name: 'deck-build',
       component: () => import('@/views/DeckBuilderPage.vue'),
     },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('@/views/RegisterPage.vue'),
+    },
   ],
 })
 

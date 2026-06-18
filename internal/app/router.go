@@ -8,8 +8,10 @@ import (
 func RegisterRoute(e *echo.Echo, container *Container) error {
 	group := e.Group("/api/v1")
 
-	// cards
+	// auth
+	group.POST("/auth/register", container.AuthHandler.Register)
 
+	// cards
 	group.GET("/cards", container.CardHandler.ListCard)
 
 	// collection

@@ -23,6 +23,7 @@ const showSearch = computed(
         <RouterLink to="/collection" class="nav-link">Ma collection</RouterLink>
         <RouterLink to="/deck" class="nav-link">Mes decks</RouterLink>
         <RouterLink to="/deck/build" class="nav-link">Créer un deck</RouterLink>
+        <RouterLink to="/register" class="nav-link">Créer un compte</RouterLink>
       </div>
 
       <div v-if="showSearch" class="relative min-w-0 flex-1 sm:max-w-xs lg:ml-auto lg:max-w-sm">
