@@ -8,4 +8,6 @@ import (
 
 type Repository interface {
 	Save(ctx context.Context, d domain.Deck) error
+	FindBy(ctx context.Context) ([]domain.Deck, error)
+	CountBy(ctx context.Context) (int, error)
 }

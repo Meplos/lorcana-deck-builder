@@ -8,6 +8,7 @@ import type {
   PaginateParams,
   PaginatedCollections,
   SaveDeckBody,
+  SavedDecksList,
 } from '@/types/api'
 
 export const API_BASE = 'http://localhost:9090/api/v1'
@@ -85,6 +86,11 @@ export function saveDeck(body: SaveDeckBody): Promise<void> {
     method: 'POST',
     body: JSON.stringify(body),
   })
+}
+
+/** GET /deck */
+export function fetchDecks(): Promise<SavedDecksList> {
+  return request<SavedDecksList>('/deck')
 }
 
 /** GET /collections/export — télécharge un CSV de toutes les collections */

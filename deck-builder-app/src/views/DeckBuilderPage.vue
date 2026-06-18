@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useMutation, useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { buildDeck, fetchCollections, saveDeck } from '@/api/client'
 import CardPreviewModal from '@/components/CardPreviewModal.vue'
 import {
@@ -14,6 +14,8 @@ import {
 } from '@/types/api'
 import { INK_COLOR_ACCENT, INK_COLOR_INFO } from '@/data/inkColors'
 import { normalizeRarity } from '@/utils/rarity'
+
+const queryClient = useQueryClient()
 
 const { data: collectionsData } = useQuery({
   queryKey: ['collections'],
@@ -79,6 +81,7 @@ const { mutate: save, isPending: isSaving } = useMutation({
   onSuccess: () => {
     deckSaved.value = true
     saveFeedback.value = { type: 'success', message: 'Deck sauvegardé.' }
+    queryClient.invalidateQueries({ queryKey: ['decks'] })
   },
   onError: () => {
     saveFeedback.value = { type: 'error', message: 'La sauvegarde a échoué.' }

@@ -21,6 +21,7 @@ const showSearch = computed(
       <div class="flex shrink-0 items-center gap-1 text-sm font-medium">
         <RouterLink to="/" class="nav-link">Cartes</RouterLink>
         <RouterLink to="/collection" class="nav-link">Ma collection</RouterLink>
+        <RouterLink to="/deck" class="nav-link">Mes decks</RouterLink>
         <RouterLink to="/deck/build" class="nav-link">Créer un deck</RouterLink>
       </div>
 

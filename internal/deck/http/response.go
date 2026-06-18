@@ -20,4 +20,8 @@ type (
 		Name     string          `json:"name"`
 		Deck     []DeckBuildCard `json:"deck"`
 	}
+	ListResponse struct {
+		Total int                 `json:"total"`
+		Docs  []DeckBuildResponse `json:"docs"`
+	}
 )

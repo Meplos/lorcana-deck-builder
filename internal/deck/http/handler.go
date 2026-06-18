@@ -11,12 +11,14 @@ import (
 type Handler struct {
 	buildUC *deck.BuildDeckUseCase
 	saveUC  *deck.SaveUseCase
+	listUC  *deck.ListUseCase
 }
 
-func NewHandler(buildUC *deck.BuildDeckUseCase, saveUC *deck.SaveUseCase) *Handler {
+func NewHandler(buildUC *deck.BuildDeckUseCase, saveUC *deck.SaveUseCase, listUC *deck.ListUseCase) *Handler {
 	return &Handler{
 		buildUC: buildUC,
 		saveUC:  saveUC,
+		listUC:  listUC,
 	}
 }
 
@@ -71,4 +73,12 @@ func (h *Handler) Save(ctx *echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusCreated)
+}
+
+func (h *Handler) List(ctx *echo.Context) error {
+	output := h.listUC.Execute(ctx.Request().Context())
+	return ctx.JSON(http.StatusOK, ListResponse{
+		Total: output.Total,
+		Docs:  MapDeck(output.Docs),
+	})
 }

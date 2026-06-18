@@ -15,6 +15,11 @@ const router = createRouter({
       component: () => import('@/views/CollectionPage.vue'),
     },
     {
+      path: '/deck',
+      name: 'decks',
+      component: () => import('@/views/DecksPage.vue'),
+    },
+    {
       path: '/deck/build',
       name: 'deck-build',
       component: () => import('@/views/DeckBuilderPage.vue'),

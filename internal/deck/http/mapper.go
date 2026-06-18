@@ -24,3 +24,25 @@ func MapCard(card deck.DeckCard) DeckBuildCard {
 		Filepath: card.Filepath,
 	}
 }
+
+func MapCardItems(cards []deck.CardItem) []DeckBuildCard {
+	result := make([]DeckBuildCard, 0)
+
+	for _, c := range cards {
+		result = append(result, DeckBuildCard(c))
+	}
+	return result
+}
+
+func MapDeck(decks []deck.DeckItem) []DeckBuildResponse {
+	result := make([]DeckBuildResponse, 0)
+	for _, d := range decks {
+		result = append(result, DeckBuildResponse{
+			Size:     d.Size,
+			Name:     d.Name,
+			Strategy: d.Strategy,
+			Deck:     MapCardItems(d.Deck),
+		})
+	}
+	return result
+}

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/meplos/locana-deck-builder/assets/images"
 	"github.com/meplos/locana-deck-builder/internal/cards"
 	cardsHttp "github.com/meplos/locana-deck-builder/internal/cards/http"
 	"github.com/meplos/locana-deck-builder/internal/collection"
@@ -17,6 +18,8 @@ type Container struct {
 }
 
 func NewContainer(DB *mongo.Database) (*Container, error) {
+	imageURIBuilder := images.New()
+
 	cardsRepository := cards.SetupMongoCardRepository(DB)
 	cardListUC := cards.CreateListCardUC(cardsRepository)
 
@@ -39,7 +42,8 @@ func NewContainer(DB *mongo.Database) (*Container, error) {
 	deckRepo := deck.NewRepository(DB)
 	deckBuildUC := deck.CreateBuildDeckUC(collectionRepo, aiAgent)
 	deckSaveUC := deck.NewSaveUC(deckRepo, cardsRepository)
-	deckHandler := deckHttp.NewHandler(deckBuildUC, deckSaveUC)
+	deckListUC := deck.NewListUC(deckRepo, imageURIBuilder)
+	deckHandler := deckHttp.NewHandler(deckBuildUC, deckSaveUC, deckListUC)
 
 	return &Container{
 		CardHandler:       cardHandler,

@@ -135,3 +135,9 @@ export interface SaveDeckBody {
   strategy: string
   deck: SaveDeckCard[]
 }
+
+/** Réponse GET /deck */
+export interface SavedDecksList {
+  total: number
+  docs: GeneratedDeck[]
+}
