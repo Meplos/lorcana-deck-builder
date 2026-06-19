@@ -4,6 +4,7 @@ package user
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/meplos/locana-deck-builder/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,4 +35,25 @@ func (r *MongoRepository) ExistsByEmail(ctx context.Context, email string) (bool
 		return false, err
 	}
 	return true, nil
+}
+
+func (r *MongoRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
+	var u domain.User
+	err := r.col.FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&u)
+	return u, err
+}
+
+func (r *MongoRepository) LogUserAt(ctx context.Context, ID string, iat time.Time) error {
+	_, err := r.col.UpdateByID(ctx, ID, bson.D{
+		{
+			Key: "$set",
+			Value: bson.M{
+				"last_login": iat,
+			},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -17,6 +17,7 @@ export interface Card {
   number: string
   set: string
   rarity: string
+  franchise: string
   filepath: string
 }
 
@@ -78,7 +79,7 @@ export interface CreateCollectionBody {
   name: string
 }
 
-/** Query params de GET /collections/add-card */
+/** Body de POST /collections/add-card */
 export interface AddCardBody {
   collectionId: string
   cardId: string
@@ -148,4 +149,10 @@ export interface RegisterBody {
   email: string
   password: string
   confirm_password: string
+}
+
+/** Body de POST /auth/login */
+export interface LoginBody {
+  email: string
+  password: string
 }

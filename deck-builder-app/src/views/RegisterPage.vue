@@ -200,8 +200,8 @@ const inputClass =
 
       <p class="mt-4 text-center text-sm text-slate-500 dark:text-slate-400">
         Déjà un compte ?
-        <RouterLink to="/" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">
-          Retour à l'accueil
+        <RouterLink to="/login" class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400">
+          Se connecter
         </RouterLink>
       </p>
     </form>

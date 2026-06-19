@@ -3,6 +3,7 @@ package password
 
 type Hasher interface {
 	Hash(str []byte) ([]byte, error)
+	Compare(hash []byte, password []byte) bool
 }
 
 func New() Hasher {

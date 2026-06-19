@@ -296,6 +296,12 @@ onBeforeUnmount(() => {
               {{ selectedCard.title }}
             </p>
             <p
+              v-if="selectedCard.franchise"
+              class="mt-1 text-sm text-slate-300"
+            >
+              {{ selectedCard.franchise }}
+            </p>
+            <p
               v-if="selectedCard.set || selectedCard.number || selectedCard.rarity"
               class="mt-1 text-sm capitalize text-slate-400"
             >

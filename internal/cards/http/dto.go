@@ -7,14 +7,15 @@ import (
 )
 
 type CardDTO struct {
-	ID       string            `json:"id"`
-	Name     string            `json:"name"`
-	Title    string            `json:"title"`
-	Colors   []domain.InkColor `json:"colors"`
-	Number   string            `json:"number"`
-	Set      string            `json:"set"`
-	Rarity   string            `json:"rarity"`
-	FilePath string            `json:"filepath"`
+	ID        string            `json:"id"`
+	Name      string            `json:"name"`
+	Title     string            `json:"title"`
+	Colors    []domain.InkColor `json:"colors"`
+	Number    string            `json:"number"`
+	Set       string            `json:"set"`
+	Rarity    string            `json:"rarity"`
+	Franchise string            `json:"franchise"`
+	FilePath  string            `json:"filepath"`
 }
 
 type PaginateRequest struct {
@@ -33,13 +34,14 @@ type PaginateResponse struct {
 
 func BuildCardDTO(c domain.Card) CardDTO {
 	return CardDTO{
-		ID:       c.ID,
-		Name:     c.Name,
-		Title:    c.Title,
-		Colors:   c.Color,
-		Number:   c.Number,
-		Set:      c.Set,
-		Rarity:   c.Rarity,
-		FilePath: fmt.Sprintf("https://cdn.dreamborn.ink/images/fr/cards/%s", c.ID),
+		ID:        c.ID,
+		Name:      c.Name,
+		Title:     c.Title,
+		Colors:    c.Color,
+		Number:    c.Number,
+		Set:       c.Set,
+		Rarity:    c.Rarity,
+		Franchise: c.Franchise,
+		FilePath:  fmt.Sprintf("https://cdn.dreamborn.ink/images/fr/cards/%s", c.ID),
 	}
 }

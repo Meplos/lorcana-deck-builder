@@ -79,7 +79,7 @@ func (uc *RegisterUseCase) Execute(ctx context.Context, input RegisterInput) (Re
 	}, nil
 }
 
-func NewRegisterUC(repo user.Repository, jwt jwt.JWTManager, hasher password.Hasher) *RegisterUseCase {
+func NewRegisterUC(repo user.Repository, hasher password.Hasher, jwt jwt.JWTManager) *RegisterUseCase {
 	return &RegisterUseCase{
 		repo:   repo,
 		jwt:    jwt,

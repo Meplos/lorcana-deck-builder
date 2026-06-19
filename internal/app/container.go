@@ -55,8 +55,9 @@ func NewContainer(DB *mongo.Database) (*Container, error) {
 	jwtManager := jwt.New()
 	hasher := password.New()
 
-	authRegisterUC := auth.NewRegisterUC(userRepo, jwtManager, hasher)
-	authHandler := authHttp.NewHandler(authRegisterUC)
+	authRegisterUC := auth.NewRegisterUC(userRepo, hasher, jwtManager)
+	authLoginUC := auth.NewLoginUC(userRepo, hasher, jwtManager)
+	authHandler := authHttp.NewHandler(authRegisterUC, authLoginUC)
 
 	return &Container{
 		CardHandler:       cardHandler,

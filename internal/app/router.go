@@ -10,6 +10,7 @@ func RegisterRoute(e *echo.Echo, container *Container) error {
 
 	// auth
 	group.POST("/auth/register", container.AuthHandler.Register)
+	group.POST("/auth/login", container.AuthHandler.Login)
 
 	// cards
 	group.GET("/cards", container.CardHandler.ListCard)
@@ -18,7 +19,7 @@ func RegisterRoute(e *echo.Echo, container *Container) error {
 	group.POST("/collections", container.CollectionHandler.Create)
 	group.GET("/collections", container.CollectionHandler.List)
 	group.GET("/collections/export", container.CollectionHandler.Export)
-	group.GET("/collections/add-card", container.CollectionHandler.AddCard)
+	group.POST("/collections/add-card", container.CollectionHandler.AddCard)
 
 	// deck
 	group.POST("/deck/build", container.DeckHandler.BuildDeck)

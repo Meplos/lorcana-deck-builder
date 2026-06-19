@@ -13,4 +13,6 @@ var (
 
 	ErrPasswordNoSpecial = errors.New("password must contain a special character")
 	ErrAlreadyExist      = errors.New("user already exist")
+	ErrWrongPassword     = errors.New("password incorrect")
+	ErrNotExist          = errors.New("user not exist")
 )

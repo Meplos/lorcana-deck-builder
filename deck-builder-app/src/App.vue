@@ -23,6 +23,7 @@ const showSearch = computed(
         <RouterLink to="/collection" class="nav-link">Ma collection</RouterLink>
         <RouterLink to="/deck" class="nav-link">Mes decks</RouterLink>
         <RouterLink to="/deck/build" class="nav-link">Créer un deck</RouterLink>
+        <RouterLink to="/login" class="nav-link">Connexion</RouterLink>
         <RouterLink to="/register" class="nav-link">Créer un compte</RouterLink>
       </div>
 

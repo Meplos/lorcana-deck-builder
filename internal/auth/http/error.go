@@ -55,6 +55,9 @@ func mapAuthError(err error) (int, string) {
 	case errors.Is(err, auth.ErrAlreadyExist):
 		return http.StatusConflict, "Un compte existe déjà avec cet email."
 
+	case errors.Is(err, auth.ErrNotExist), errors.Is(err, auth.ErrWrongPassword):
+		return http.StatusUnauthorized, "Email ou mot de passe incorrect."
+
 	default:
 		return http.StatusInternalServerError, "Une erreur interne est survenue."
 	}

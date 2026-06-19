@@ -7,6 +7,7 @@ import type {
   PaginatedCards,
   PaginateParams,
   PaginatedCollections,
+  LoginBody,
   RegisterBody,
   SaveDeckBody,
   SavedDecksList,
@@ -50,6 +51,14 @@ export function registerUser(body: RegisterBody): Promise<void> {
   })
 }
 
+/** POST /auth/login */
+export function loginUser(body: LoginBody): Promise<void> {
+  return request<void>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
 /** GET /cards */
 export function fetchCards(params: PaginateParams): Promise<PaginatedCards> {
   const query = new URLSearchParams({
@@ -81,14 +90,12 @@ export function createCollection(body: CreateCollectionBody): Promise<void> {
   })
 }
 
-/** GET /collections/add-card */
+/** POST /collections/add-card */
 export function addCard(body: AddCardBody): Promise<void> {
-  const query = new URLSearchParams({
-    collectionId: body.collectionId,
-    cardId: body.cardId,
-    quantity: String(body.quantity),
+  return request<void>('/collections/add-card', {
+    method: 'POST',
+    body: JSON.stringify(body),
   })
-  return request<void>(`/collections/add-card?${query}`)
 }
 
 /** POST /deck/build */
