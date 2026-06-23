@@ -15,6 +15,7 @@ type (
 	}
 
 	DeckBuildResponse struct {
+		ID       string          `json:"id,omitempty"`
 		Size     int             `json:"size"`
 		Strategy string          `json:"strategy"`
 		Name     string          `json:"name"`
@@ -23,5 +24,8 @@ type (
 	ListResponse struct {
 		Total int                 `json:"total"`
 		Docs  []DeckBuildResponse `json:"docs"`
+	}
+	ExportResponse struct {
+		Content string `json:"content"`
 	}
 )

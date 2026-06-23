@@ -2,9 +2,10 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
-import { fetchDecks } from '@/api/client'
+import { exportDeck, fetchDecks } from '@/api/client'
 import CardPreviewModal from '@/components/CardPreviewModal.vue'
-import type { DeckCard, GeneratedDeck } from '@/types/api'
+import DeckExportModal from '@/components/DeckExportModal.vue'
+import type { DeckCard, SavedDeck } from '@/types/api'
 import { normalizeRarity } from '@/utils/rarity'
 
 const {
@@ -17,14 +18,41 @@ const {
 })
 
 const decks = computed(() => decksData.value?.docs ?? [])
-const selectedDeck = ref<GeneratedDeck | null>(null)
+const selectedDeck = ref<SavedDeck | null>(null)
 const previewCard = ref<DeckCard | null>(null)
+const exportModalOpen = ref(false)
+const exportContent = ref('')
+const exportLoading = ref(false)
+const exportError = ref('')
+const exportingDeck = ref<SavedDeck | null>(null)
 
-function selectDeck(deck: GeneratedDeck) {
+function selectDeck(deck: SavedDeck) {
   selectedDeck.value =
-    selectedDeck.value?.name === deck.name && selectedDeck.value?.size === deck.size
-      ? null
-      : deck
+    selectedDeck.value?.id === deck.id ? null : deck
+}
+
+async function openExport(deck: SavedDeck) {
+  exportingDeck.value = deck
+  exportModalOpen.value = true
+  exportContent.value = ''
+  exportError.value = ''
+  exportLoading.value = true
+
+  try {
+    const response = await exportDeck(deck.id)
+    exportContent.value = response.content
+  } catch {
+    exportError.value = "Impossible d'exporter le deck."
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+function closeExport() {
+  exportModalOpen.value = false
+  exportingDeck.value = null
+  exportContent.value = ''
+  exportError.value = ''
 }
 
 function openPreview(card: DeckCard) {
@@ -85,12 +113,12 @@ function closePreview() {
 
     <template v-else>
       <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <li v-for="(deck, index) in decks" :key="`${deck.name}-${index}`">
+        <li v-for="deck in decks" :key="deck.id">
           <button
             type="button"
             class="w-full rounded-2xl border p-4 text-left transition"
             :class="
-              selectedDeck?.name === deck.name && selectedDeck?.size === deck.size
+              selectedDeck?.id === deck.id
                 ? 'border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10'
                 : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600'
             "
@@ -112,13 +140,24 @@ function closePreview() {
 
       <section v-if="selectedDeck" class="flex flex-col gap-6">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-          <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ selectedDeck.name }}</h2>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            {{ selectedDeck.size }} cartes
-          </p>
-          <p v-if="selectedDeck.strategy" class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            {{ selectedDeck.strategy }}
-          </p>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ selectedDeck.name }}</h2>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                {{ selectedDeck.size }} cartes
+              </p>
+              <p v-if="selectedDeck.strategy" class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                {{ selectedDeck.strategy }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="self-start rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
+              @click="openExport(selectedDeck)"
+            >
+              Exporter en texte
+            </button>
+          </div>
         </div>
 
         <div>
@@ -191,4 +230,12 @@ function closePreview() {
   </div>
 
   <CardPreviewModal :card="previewCard" @close="closePreview" />
+  <DeckExportModal
+    :open="exportModalOpen"
+    :deck-name="exportingDeck?.name ?? ''"
+    :content="exportContent"
+    :loading="exportLoading"
+    :error="exportError"
+    @close="closeExport"
+  />
 </template>

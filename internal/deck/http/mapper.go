@@ -38,6 +38,7 @@ func MapDeck(decks []deck.DeckItem) []DeckBuildResponse {
 	result := make([]DeckBuildResponse, 0)
 	for _, d := range decks {
 		result = append(result, DeckBuildResponse{
+			ID:       d.ID,
 			Size:     d.Size,
 			Name:     d.Name,
 			Strategy: d.Strategy,

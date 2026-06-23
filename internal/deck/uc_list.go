@@ -33,6 +33,7 @@ type (
 		Filepath string
 	}
 	DeckItem struct {
+		ID       string
 		Strategy string
 		Name     string
 		Size     int
@@ -63,6 +64,7 @@ func (uc *ListUseCase) Execute(ctx context.Context) ListOutput {
 	docs := make([]DeckItem, 0)
 	for _, d := range decks {
 		docs = append(docs, DeckItem{
+			ID:       d.ID,
 			Strategy: d.Strategy,
 			Name:     d.Name,
 			Size:     d.Size,

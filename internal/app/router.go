@@ -26,6 +26,7 @@ func RegisterRoute(e *echo.Echo, container *Container) error {
 	group.POST("/deck/build", container.DeckHandler.BuildDeck, container.AuthHandler.IsConnected)
 	group.GET("/deck", container.DeckHandler.List, container.AuthHandler.IsConnected)
 	group.POST("/deck", container.DeckHandler.Save, container.AuthHandler.IsConnected)
+	group.GET("/deck/export", container.DeckHandler.Export, container.AuthHandler.IsConnected)
 
 	return nil
 }

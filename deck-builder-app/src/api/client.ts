@@ -9,6 +9,7 @@ import type {
   PaginatedCollections,
   LoginBody,
   RegisterBody,
+  DeckExportResponse,
   SaveDeckBody,
   SavedDecksList,
 } from '@/types/api'
@@ -132,6 +133,12 @@ export function saveDeck(body: SaveDeckBody): Promise<void> {
 /** GET /deck */
 export function fetchDecks(): Promise<SavedDecksList> {
   return request<SavedDecksList>('/deck')
+}
+
+/** GET /deck/export */
+export function exportDeck(id: string): Promise<DeckExportResponse> {
+  const query = new URLSearchParams({ id })
+  return request<DeckExportResponse>(`/deck/export?${query}`)
 }
 
 /** GET /collections/export — télécharge un CSV de toutes les collections */

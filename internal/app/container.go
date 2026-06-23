@@ -49,7 +49,8 @@ func NewContainer(DB *mongo.Database) (*Container, error) {
 	deckBuildUC := deck.CreateBuildDeckUC(collectionRepo, aiAgent)
 	deckSaveUC := deck.NewSaveUC(deckRepo, cardsRepository)
 	deckListUC := deck.NewListUC(deckRepo, imageURIBuilder)
-	deckHandler := deckHttp.NewHandler(deckBuildUC, deckSaveUC, deckListUC)
+	deckExportUC := deck.NewExportUC(deckRepo)
+	deckHandler := deckHttp.NewHandler(deckBuildUC, deckSaveUC, deckListUC, deckExportUC)
 
 	userRepo := user.NewRepository(DB)
 	jwtManager := jwt.New()

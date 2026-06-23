@@ -12,4 +12,7 @@ type (
 		Name     string            `json:"name"`
 		Deck     []SaveCardRequest `json:"deck"`
 	}
+	ExportRequest struct {
+		ID string `query:"id"`
+	}
 )

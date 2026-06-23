@@ -9,16 +9,18 @@ import (
 )
 
 type Handler struct {
-	buildUC *deck.BuildDeckUseCase
-	saveUC  *deck.SaveUseCase
-	listUC  *deck.ListUseCase
+	buildUC  *deck.BuildDeckUseCase
+	saveUC   *deck.SaveUseCase
+	listUC   *deck.ListUseCase
+	exportUC *deck.ExportUseCase
 }
 
-func NewHandler(buildUC *deck.BuildDeckUseCase, saveUC *deck.SaveUseCase, listUC *deck.ListUseCase) *Handler {
+func NewHandler(buildUC *deck.BuildDeckUseCase, saveUC *deck.SaveUseCase, listUC *deck.ListUseCase, exportUC *deck.ExportUseCase) *Handler {
 	return &Handler{
-		buildUC: buildUC,
-		saveUC:  saveUC,
-		listUC:  listUC,
+		buildUC:  buildUC,
+		saveUC:   saveUC,
+		listUC:   listUC,
+		exportUC: exportUC,
 	}
 }
 
@@ -80,5 +82,22 @@ func (h *Handler) List(ctx *echo.Context) error {
 	return ctx.JSON(http.StatusOK, ListResponse{
 		Total: output.Total,
 		Docs:  MapDeck(output.Docs),
+	})
+}
+
+func (h *Handler) Export(ctx *echo.Context) error {
+	var query ExportRequest
+	if err := ctx.Bind(&query); err != nil {
+		return ctx.NoContent(http.StatusBadRequest)
+	}
+
+	output, err := h.exportUC.Execute(ctx.Request().Context(), deck.ExportInput{
+		ID: query.ID,
+	})
+	if err != nil {
+		return ctx.NoContent(http.StatusInternalServerError)
+	}
+	return ctx.JSON(http.StatusOK, ExportResponse{
+		Content: output.Content,
 	})
 }

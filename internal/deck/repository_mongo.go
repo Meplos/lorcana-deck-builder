@@ -46,3 +46,12 @@ func (r *MongoRepository) FindBy(ctx context.Context) ([]domain.Deck, error) {
 
 	return deck, nil
 }
+
+func (r *MongoRepository) FindByID(ctx context.Context, ID string) (domain.Deck, error) {
+	var deck domain.Deck
+	err := r.col.FindOne(ctx, bson.D{
+		{Key: "_id", Value: ID},
+	}).Decode(&deck)
+
+	return deck, err
+}

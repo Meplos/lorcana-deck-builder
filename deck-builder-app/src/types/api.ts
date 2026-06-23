@@ -137,10 +137,20 @@ export interface SaveDeckBody {
   deck: SaveDeckCard[]
 }
 
+/** Deck sauvegardé — renvoyé dans docs de GET /deck */
+export interface SavedDeck extends GeneratedDeck {
+  id: string
+}
+
+/** Réponse GET /deck/export */
+export interface DeckExportResponse {
+  content: string
+}
+
 /** Réponse GET /deck */
 export interface SavedDecksList {
   total: number
-  docs: GeneratedDeck[]
+  docs: SavedDeck[]
 }
 
 /** Body de POST /auth/register */
