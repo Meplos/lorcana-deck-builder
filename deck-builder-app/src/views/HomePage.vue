@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useQuery, keepPreviousData } from '@tanstack/vue-query'
 import { RouterLink } from 'vue-router'
 import { fetchCards, fetchCollections } from '@/api/client'
+import { useAuthSession } from '@/auth/session'
 import OwnedQuantityEditor from '@/components/OwnedQuantityEditor.vue'
 import { useSearch } from '@/composables/useSearch'
 import { INK_COLORS, type Card, type InkColor } from '@/types/api'
@@ -12,6 +13,7 @@ const PAGE_SIZE = 50
 const SEARCH_DEBOUNCE_MS = 350
 
 const { search } = useSearch()
+const { isAuthenticated } = useAuthSession()
 
 const page = ref(1)
 const debouncedSearch = ref('')
@@ -76,6 +78,7 @@ const selectedCollection = ref('')
 const { data: collectionsData } = useQuery({
   queryKey: ['collections'],
   queryFn: () => fetchCollections({ limit: 50 }),
+  enabled: computed(() => isAuthenticated.value),
   retry: false,
 })
 
@@ -83,15 +86,31 @@ const collectionOptions = computed(
   () => collectionsData.value?.docs.map((c) => ({ id: c.id, name: c.name })) ?? [],
 )
 
+watch(
+  collectionOptions,
+  (options) => {
+    if (!selectedCollection.value && options[0]) {
+      selectedCollection.value = options[0].id
+    }
+  },
+  { immediate: true },
+)
+
+const activeCollection = computed(() =>
+  collectionsData.value?.docs.find((c) => c.id === selectedCollection.value),
+)
+
+function ownedQuantityFor(cardId: string): number {
+  return activeCollection.value?.cards[cardId]?.quantity ?? 0
+}
+
 const ownedQuantity = computed(() => {
-  if (!selectedCard.value || !selectedCollection.value) return 0
-  const col = collectionsData.value?.docs.find((c) => c.id === selectedCollection.value)
-  return col?.cards[selectedCard.value.id]?.quantity ?? 0
+  if (!selectedCard.value) return 0
+  return ownedQuantityFor(selectedCard.value.id)
 })
 
 function openCard(card: Card) {
   selectedCard.value = card
-  selectedCollection.value = collectionOptions.value[0]?.id ?? ''
 }
 
 function closeCard() {
@@ -128,15 +147,27 @@ onBeforeUnmount(() => {
         <span class="text-emerald-500">Cards</span>
       </h1>
 
-      <select
-        v-model="color"
-        class="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-3 pr-8 text-sm capitalize text-slate-900 shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 sm:w-44 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-      >
-        <option value="">Toutes les couleurs</option>
-        <option v-for="c in INK_COLORS" :key="c" :value="c" class="capitalize">
-          {{ c }}
-        </option>
-      </select>
+      <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+        <select
+          v-if="collectionOptions.length > 0"
+          v-model="selectedCollection"
+          class="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-3 pr-8 text-sm text-slate-900 shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 sm:w-52 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        >
+          <option v-for="col in collectionOptions" :key="col.id" :value="col.id">
+            {{ col.name }}
+          </option>
+        </select>
+
+        <select
+          v-model="color"
+          class="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-3 pr-8 text-sm capitalize text-slate-900 shadow-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 sm:w-44 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+        >
+          <option value="">Toutes les couleurs</option>
+          <option v-for="c in INK_COLORS" :key="c" :value="c" class="capitalize">
+            {{ c }}
+          </option>
+        </select>
+      </div>
     </header>
 
     <main class="flex-1">
@@ -171,7 +202,13 @@ onBeforeUnmount(() => {
           @keydown.enter="openCard(card)"
           @keydown.space.prevent="openCard(card)"
         >
-          <div class="card-tile-media aspect-[5/7] overflow-hidden">
+          <div class="card-tile-media relative aspect-[5/7] overflow-hidden">
+            <span
+              v-if="selectedCollection && ownedQuantityFor(card.id) > 0"
+              class="absolute right-2 top-2 z-10 rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-bold text-white shadow"
+            >
+              ×{{ ownedQuantityFor(card.id) }}
+            </span>
             <img
               :src="card.filepath"
               :alt="card.name"
@@ -258,12 +295,13 @@ onBeforeUnmount(() => {
     >
       <div
         v-if="selectedCard"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+        class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-4 backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
         @click.self="closeCard"
       >
-        <div class="relative flex max-h-full w-full max-w-md flex-col items-center gap-4">
+        <div class="flex min-h-full items-center justify-center py-6 sm:py-8">
+          <div class="relative flex w-full max-w-md flex-col items-center gap-4">
           <button
             type="button"
             aria-label="Close preview"
@@ -284,7 +322,7 @@ onBeforeUnmount(() => {
           <img
             :src="selectedCard.filepath"
             :alt="selectedCard.name"
-            class="max-h-[80vh] w-auto rounded-2xl shadow-2xl"
+            class="max-h-[55vh] w-auto max-w-[min(100%,16rem)] rounded-2xl shadow-2xl sm:max-w-[18rem]"
           />
 
           <div class="text-center">
@@ -311,7 +349,20 @@ onBeforeUnmount(() => {
 
           <div class="w-full rounded-2xl bg-white p-4 shadow-xl dark:bg-slate-800">
             <p
-              v-if="collectionOptions.length === 0"
+              v-if="!isAuthenticated"
+              class="text-center text-sm text-slate-500 dark:text-slate-400"
+            >
+              <RouterLink
+                :to="{ name: 'login', query: { redirect: '/' } }"
+                class="font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+              >
+                Connecte-toi
+              </RouterLink>
+              pour ajouter des cartes à ta collection.
+            </p>
+
+            <p
+              v-else-if="collectionOptions.length === 0"
               class="text-center text-sm text-slate-500 dark:text-slate-400"
             >
               Aucune collection. Crée-en une dans
@@ -344,6 +395,7 @@ onBeforeUnmount(() => {
                 :owned-quantity="ownedQuantity"
               />
             </template>
+          </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { useAuthSession } from '@/auth/session'
 import { useSearch } from '@/composables/useSearch'
 
 const route = useRoute()
 const { search } = useSearch()
+const { isAuthenticated, isInitialized } = useAuthSession()
 
 const showSearch = computed(
   () => route.name === 'home' || route.name === 'collection',
@@ -20,11 +22,16 @@ const showSearch = computed(
 
       <div class="flex shrink-0 items-center gap-1 text-sm font-medium">
         <RouterLink to="/" class="nav-link">Cartes</RouterLink>
-        <RouterLink to="/collection" class="nav-link">Ma collection</RouterLink>
-        <RouterLink to="/deck" class="nav-link">Mes decks</RouterLink>
-        <RouterLink to="/deck/build" class="nav-link">Créer un deck</RouterLink>
-        <RouterLink to="/login" class="nav-link">Connexion</RouterLink>
-        <RouterLink to="/register" class="nav-link">Créer un compte</RouterLink>
+        <template v-if="isAuthenticated">
+          <RouterLink to="/collection" class="nav-link">Ma collection</RouterLink>
+          <RouterLink to="/deck" class="nav-link">Mes decks</RouterLink>
+          <RouterLink to="/deck/build" class="nav-link">Créer un deck</RouterLink>
+          <RouterLink to="/account" class="nav-link">Mon compte</RouterLink>
+        </template>
+        <template v-else-if="isInitialized">
+          <RouterLink to="/login" class="nav-link">Connexion</RouterLink>
+          <RouterLink to="/register" class="nav-link">Créer un compte</RouterLink>
+        </template>
       </div>
 
       <div v-if="showSearch" class="relative min-w-0 flex-1 sm:max-w-xs lg:ml-auto lg:max-w-sm">

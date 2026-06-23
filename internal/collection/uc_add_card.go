@@ -33,8 +33,39 @@ func (uc *AddCardUseCase) AddCardToCollection(ctx context.Context, collID primit
 		return errors.New("card not found")
 	}
 
+	abilities := make([]domain.CardAbility, len(card.Abilities))
+	for i, a := range card.Abilities {
+		abilities[i] = domain.CardAbility{
+			Name:        a.Name,
+			Description: a.Description,
+		}
+	}
+
 	return uc.collRepo.AddCardToCollection(ctx, collID, domain.CollectionCard{
-		Quantity: quantity,
-		// Card:     card,
+		ID:              card.ID,
+		Name:            card.Name,
+		Set:             card.Set,
+		Version:         card.Version,
+		Title:           card.Title,
+		Cost:            card.Cost,
+		Type:            card.Type,
+		Number:          card.Number,
+		Color:           card.Color,
+		Illustrator:     card.Illustrator,
+		Lore:            card.Lore,
+		Strength:        card.Strength,
+		Willpower:       card.Willpower,
+		Movement:        card.Movement,
+		Ink:             card.Ink,
+		Characteristics: card.Characteristics,
+		Abilities:       abilities,
+		Variants:        card.Variants,
+		Rarity:          card.Rarity,
+		Language:        card.Language,
+		Path:            card.Path,
+		Franchise:       card.Franchise,
+		Ordinal:         card.Ordinal,
+		Formats:         card.Formats,
+		Quantity:        quantity,
 	})
 }

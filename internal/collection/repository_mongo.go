@@ -112,7 +112,7 @@ func (r *MongoCollectionRepository) AddCardToCollection(ctx context.Context, col
 	res, err := r.col.UpdateOne(
 		ctx,
 		bson.M{"_id": collID},
-		bson.M{"$set": bson.E{Key: path, Value: card}},
+		bson.M{"$set": bson.D{{Key: path, Value: card}}},
 	)
 	log.Printf("Matched: %d, Modified:%d, Upsert:%d", res.MatchedCount, res.ModifiedCount, res.UpsertedCount)
 	return err

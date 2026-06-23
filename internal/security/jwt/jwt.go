@@ -4,6 +4,7 @@ import "os"
 
 type JWTManager interface {
 	Create(ID string) (string, error)
+	Parse(token string) (string, error)
 }
 
 func New() JWTManager {

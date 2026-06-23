@@ -13,4 +13,5 @@ type Repository interface {
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 	FindByEmail(ctx context.Context, email string) (domain.User, error)
 	LogUserAt(ctx context.Context, ID string, iat time.Time) error
+	FindByID(ctx context.Context, ID string) (domain.User, error)
 }

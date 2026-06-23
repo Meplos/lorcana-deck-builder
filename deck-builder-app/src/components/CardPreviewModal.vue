@@ -46,12 +46,13 @@ onBeforeUnmount(() => {
     >
       <div
         v-if="card"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+        class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-4 backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
         @click.self="emit('close')"
       >
-        <div class="relative flex max-h-full w-full max-w-md flex-col items-center gap-4">
+        <div class="flex min-h-full items-center justify-center py-6 sm:py-8">
+          <div class="relative flex w-full max-w-md flex-col items-center gap-4">
           <button
             type="button"
             aria-label="Fermer la preview"
@@ -72,7 +73,7 @@ onBeforeUnmount(() => {
           <img
             :src="card.filepath"
             :alt="card.name"
-            class="max-h-[80vh] w-auto rounded-2xl shadow-2xl"
+            class="max-h-[55vh] w-auto max-w-[min(100%,16rem)] rounded-2xl shadow-2xl sm:max-w-[18rem]"
           />
 
           <div class="text-center">
@@ -98,6 +99,7 @@ onBeforeUnmount(() => {
             <p class="mt-2 text-sm font-semibold text-emerald-400">
               ×{{ card.quantity }} dans le deck
             </p>
+          </div>
           </div>
         </div>
       </div>

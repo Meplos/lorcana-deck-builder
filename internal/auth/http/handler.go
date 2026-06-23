@@ -11,12 +11,14 @@ import (
 type Handler struct {
 	registerUC *auth.RegisterUseCase
 	loginUC    *auth.LoginUseCase
+	verifyUC   *auth.VerifyUseCase
 }
 
-func NewHandler(registerUC *auth.RegisterUseCase, loginUC *auth.LoginUseCase) *Handler {
+func NewHandler(registerUC *auth.RegisterUseCase, loginUC *auth.LoginUseCase, verifyUC *auth.VerifyUseCase) *Handler {
 	return &Handler{
 		registerUC: registerUC,
 		loginUC:    loginUC,
+		verifyUC:   verifyUC,
 	}
 }
 
@@ -70,4 +72,34 @@ func (h *Handler) Login(ctx *echo.Context) error {
 	})
 
 	return ctx.JSON(http.StatusAccepted, nil)
+}
+
+func (h *Handler) IsConnected(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx *echo.Context) error {
+		cookie, err := ctx.Cookie("ldb-tkn")
+		if err != nil {
+			return ctx.NoContent(http.StatusForbidden)
+		}
+		u, err := h.verifyUC.Execute(ctx.Request().Context(), auth.VerifyInput{
+			Token: cookie.Value,
+		})
+		if err != nil {
+			return ctx.NoContent(http.StatusForbidden)
+		}
+
+		ctx.Set("auth-user", u)
+		return next(ctx)
+	}
+}
+
+func (h *Handler) Logout(ctx *echo.Context) error {
+	ctx.SetCookie(&http.Cookie{
+		Name:     "ldb-tkn",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	})
+	return ctx.NoContent(http.StatusOK)
 }

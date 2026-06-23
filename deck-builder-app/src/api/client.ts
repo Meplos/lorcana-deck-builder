@@ -12,6 +12,8 @@ import type {
   SaveDeckBody,
   SavedDecksList,
 } from '@/types/api'
+import { ApiError } from '@/api/errors'
+import { markUnauthenticated } from '@/auth/session'
 
 export const API_BASE = import.meta.env.VITE_API_BASE ?? '/api/v1'
 
@@ -26,6 +28,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   })
   const text = await res.text()
   if (!res.ok) {
+    if (res.status === 403) {
+      markUnauthenticated()
+    }
     let message = `Request failed: ${res.status} ${res.statusText}`
     if (text) {
       try {
@@ -35,7 +40,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         // ignore malformed error body
       }
     }
-    throw new Error(message)
+    if (res.status === 403) {
+      message = 'Connecte-toi pour accéder à cette ressource.'
+    }
+    throw new ApiError(message, res.status)
   }
   if (res.status === 204 || res.status === 202) {
     return undefined as T
@@ -56,6 +64,13 @@ export function loginUser(body: LoginBody): Promise<void> {
   return request<void>('/auth/login', {
     method: 'POST',
     body: JSON.stringify(body),
+  })
+}
+
+/** POST /logout */
+export function logoutUser(): Promise<void> {
+  return request<void>('/logout', {
+    method: 'POST',
   })
 }
 
@@ -125,7 +140,15 @@ export async function exportCollections(): Promise<void> {
     credentials: 'include',
   })
   if (!res.ok) {
-    throw new Error(`Request failed: ${res.status} ${res.statusText}`)
+    if (res.status === 403) {
+      markUnauthenticated()
+    }
+    throw new ApiError(
+      res.status === 403
+        ? 'Connecte-toi pour accéder à cette ressource.'
+        : `Request failed: ${res.status} ${res.statusText}`,
+      res.status,
+    )
   }
   const blob = await res.blob()
   const disposition = res.headers.get('Content-Disposition')

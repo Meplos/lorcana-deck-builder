@@ -57,3 +57,9 @@ func (r *MongoRepository) LogUserAt(ctx context.Context, ID string, iat time.Tim
 	}
 	return nil
 }
+
+func (r *MongoRepository) FindByID(ctx context.Context, ID string) (domain.User, error) {
+	var u domain.User
+	err := r.col.FindOne(ctx, bson.D{{Key: "_id", Value: ID}}).Decode(&u)
+	return u, err
+}

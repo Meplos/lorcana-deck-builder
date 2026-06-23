@@ -1,10 +1,14 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useMutation } from '@tanstack/vue-query'
-import { RouterLink, useRouter } from 'vue-router'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { registerUser } from '@/api/client'
+import { resetSessionProbe } from '@/auth/bootstrap'
+import { markAuthenticated } from '@/auth/session'
 
 const router = useRouter()
+const route = useRoute()
+const queryClient = useQueryClient()
 
 const name = ref('')
 const email = ref('')
@@ -56,8 +60,12 @@ function validate(): string | null {
 
 const { mutate: register, isPending } = useMutation({
   mutationFn: registerUser,
-  onSuccess: () => {
-    router.push('/')
+  onSuccess: async () => {
+    resetSessionProbe()
+    markAuthenticated()
+    await queryClient.invalidateQueries()
+    const redirect = route.query.redirect
+    router.push(typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/')
   },
   onError: (err) => {
     error.value =

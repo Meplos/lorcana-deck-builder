@@ -1,14 +1,25 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useMutation } from '@tanstack/vue-query'
-import { RouterLink, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { loginUser } from '@/api/client'
+import { resetSessionProbe } from '@/auth/bootstrap'
+import { markAuthenticated } from '@/auth/session'
 
 const router = useRouter()
+const route = useRoute()
+const queryClient = useQueryClient()
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
+
+const redirectPath = computed(() => {
+  const redirect = route.query.redirect
+  return typeof redirect === 'string' && redirect.startsWith('/') ? redirect : '/'
+})
+
+const showRedirectHint = computed(() => typeof route.query.redirect === 'string')
 
 function validate(): string | null {
   const trimmedEmail = email.value.trim()
@@ -21,8 +32,11 @@ function validate(): string | null {
 
 const { mutate: login, isPending } = useMutation({
   mutationFn: loginUser,
-  onSuccess: () => {
-    router.push('/')
+  onSuccess: async () => {
+    resetSessionProbe()
+    markAuthenticated()
+    await queryClient.invalidateQueries()
+    router.push(redirectPath.value)
   },
   onError: (err) => {
     error.value =
@@ -61,6 +75,12 @@ const inputClass =
         </h1>
         <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
           Accède à tes collections et decks Lorcana.
+        </p>
+        <p
+          v-if="showRedirectHint"
+          class="mt-2 text-xs text-amber-600 dark:text-amber-400"
+        >
+          Connecte-toi pour accéder à la page demandée.
         </p>
       </header>
 
